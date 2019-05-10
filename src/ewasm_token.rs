@@ -2,15 +2,17 @@
 extern crate ewasm_api;
 use ewasm_api::types::*;
 
+// 0x9993021a do_balance() ABI signature
+const do_balance_signature: [u8; 4] = [153, 147, 2, 26];
+
+// 0x5d359fbd do_transfer() ABI signature
+const do_transfer_signature: [u8; 4] = [93, 53, 159, 189];
+
+// 0xb259f48b init() ABI signature
+const do_init_signature: [u8; 4] = [178, 89, 244, 139];
+
 #[no_mangle]
 pub fn main() {
-    // 0x9993021a do_balance() ABI signature
-    let do_balance_signature: [u8; 4] = [153, 147, 2, 26];
-
-    // 0x5d359fbd do_transfer() ABI signature
-    let do_transfer_signature: [u8; 4] = [93, 53, 159, 189];
-    
-
     let data_size = ewasm_api::calldata_size();
     let input_data = ewasm_api::calldata_acquire();
 
@@ -112,5 +114,20 @@ pub fn main() {
         ewasm_api::storage_store(&recipient_key, &rc_value); 
 
     } 
+
+    if function_selector == do_init_signature {
+        let mut owner = StorageKey::default();
+        //input_data[4..24].copy_from_slice(&owner.bytes);
+        owner.bytes.copy_from_slice(&input_data[4..24]);
+
+        let mut balance = StorageValue::default();
+        //input_data[24..32].copy_from_slice(&balance.bytes[24..32]);
+        balance.bytes.copy_from_slice(&input_data[24..32]);
+
+        // debug output here
+        
+        ewasm_api::storage_store(&owner, &balance);
+    }
+
     return;
 }
